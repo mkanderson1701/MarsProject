@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "course project",
   "main": "index.js",
+  "repository": {
+    "url": "https://github.com/mkanderson71/MarsProject",
+    "type": "git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/index.js"
