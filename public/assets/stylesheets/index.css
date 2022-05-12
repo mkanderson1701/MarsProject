@@ -1,7 +1,7 @@
 body {
   display: flex;
   flex-direction: column;
-  font-family: Arial;
+  font-family: Helvetica;
   min-height: 100vh;
   color:white;
   background-color: black;
@@ -12,7 +12,6 @@ header {
 }
 
 main {
-  flex: 1;
   padding: 20px;
 }
 
@@ -25,27 +24,58 @@ img {
   height: auto;
 }
 
+.navbar {
+  height: 50px;
+  background-image: linear-gradient(rgb(0, 0, 61), black);
+  color: white;
+  align-items: ;
+}
+
+/* ---- GRID ALL SIZES ---- */
+.grid-item {
+  background-color: #2196F3;
+  text-align: center;
+  font-size: 30px;
+  border-radius: 10px;
+  border-bottom-width: 10px;
+}
+
 /* ---- SMALL SCREEN ---- */
-@media (max-width: 768px) {
+@media (min-width: 400px) {
   /* one column */
+
   .grid-container {
     display: grid;
-    grid-template-columns: auto;
+    grid-template-areas: '.';
+    gap: 25px 10px;
+    padding: 10px;
+    background-color: #151c21;
+    border: 10px;
   }
 }
 
-/* ---- LARGE SCREEN --------- */
+/* ---- MEDIUM SCREEN --------- */
 
-@media (min-width: 769px) {
+@media (min-width: 1200px) {
   /* three columns */
   .grid-container {
     display: grid;
-    grid-template-columns: auto auto auto auto;
+    grid-template-areas: '. .';
+    gap: 10px 10px;
+    padding: 20px;
+    background-color: #151c21;
+    border: 10px;
   }
 }
 
-/* -------------------  LARGE SCREENS  -------------- */
-/*
-/*@media (min-width: 1824px) {
-/*  /* use mobile */
-/*}
+@media (min-width: 1500px) {
+  /* three columns */
+  .grid-container {
+    display: grid;
+    grid-template-areas: '. . .';
+    gap: 10px 10px;
+    padding: 25px;
+    background-color: #151c21;
+    border: 10px;
+  }
+}
