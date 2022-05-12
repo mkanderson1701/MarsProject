@@ -1,10 +1,10 @@
-/* -------------------  MOBILE  --------------------- */
-
 body {
   display: flex;
   flex-direction: column;
   font-family: Arial;
   min-height: 100vh;
+  color:white;
+  background-color: black;
 }
 
 header {
@@ -20,19 +20,32 @@ footer {
   /* footer styles */
 }
 
-/* -------------------  TABLET  --------------------- */
-@media (min-width: 768px) {
-  /* use mobile */
+img {
+  width: 100%;
+  height: auto;
 }
 
-/* -------------------  DESKTOP  -------------------- */
+/* ---- SMALL SCREEN ---- */
+@media (max-width: 768px) {
+  /* one column */
+  .grid-container {
+    display: grid;
+    grid-template-columns: auto;
+  }
+}
 
-@media (min-width: 1224px) {
-  /* use mobile */
+/* ---- LARGE SCREEN --------- */
+
+@media (min-width: 769px) {
+  /* three columns */
+  .grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+  }
 }
 
 /* -------------------  LARGE SCREENS  -------------- */
-
-@media (min-width: 1824px) {
-  /* use mobile */
-}
+/*
+/*@media (min-width: 1824px) {
+/*  /* use mobile */
+/*}
