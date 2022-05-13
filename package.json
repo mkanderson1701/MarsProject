@@ -2,14 +2,14 @@
   "name": "jsnd3_mars_dashboard",
   "version": "1.0.0",
   "description": "course project",
-  "main": "index.js",
+  "main": "mars_server.js",
   "repository": {
     "url": "https://github.com/mkanderson71/MarsProject",
     "type": "git"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server/index.js"
+    "start": "node server/mars_server.js"
   },
   "author": "",
   "license": "ISC",
