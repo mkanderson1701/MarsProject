@@ -1,3 +1,5 @@
+const { Map } = require('immutable');
+
 const store = Immutable.Map({
   user: { name: 'Student' },
   apod: {},
@@ -5,7 +7,7 @@ const store = Immutable.Map({
 })
 
 // add our markup to the page
-const root = document.getElementById('root')
+const root = ''
 
 const updateStore = (store, newState) => {
   store.merge(newState)
@@ -13,17 +15,20 @@ const updateStore = (store, newState) => {
 }
 
 const render = async (root, state) => {
-  root.innerHTML = App()
+  root = App()
+  console.log('root: ' + root)
 }
 
 // create content
 const App = () => {
   const apod = store.get('apod')
-  console.log('store.get(apod) is ' + store.get('apod'))
-  console.log('user.name is ' + (store.get('user').name))
+  console.log('store.apod is ' + store.get('apod').get('date'))
+  console.log(apod)
+  //console.debug('store get apod ' + store.get('apod'))
+  // console.log('rovers ' + rovers)
 
   return `
-            ${Greeting(store.get('user').name)}
+            ${Greeting(store.get('user.name'))}
             <section>
                 <h3>Put things on the page!</h3>
                 <p>Here is an example section.</p>
@@ -40,10 +45,9 @@ const App = () => {
     `
 }
 
-// listening for load event because page should load before any JS is called
-window.addEventListener('load', () => {
-  render(root, store)
-})
+// console version just run it
+
+render(root, store)
 
 // ------------------------------------------------------  COMPONENTS
 
@@ -64,11 +68,11 @@ const Greeting = (name) => {
 const ImageOfTheDay = () => {
   // If image does not already exist, or it is not from today -- request it again
   const today = new Date()
-  const photodate = new Date(store.get('apod').date)
+  const photodate = new Date(store.get(apod, 'date'))
   console.debug('photodate is ' + photodate)
   console.debug('today is ' + today)
 
-  if (photodate.getDate() !== today.getDate()) {
+  if (!apod.get('date') || photodate === today.getDate()) {
     console.debug('getting new image')
     getImageOfTheDay()
   }
@@ -95,13 +99,8 @@ const getImageOfTheDay = () => {
   const apod = store.get('apod')
   fetch('http://localhost:3000/apod')
     .then(res => res.json())
-    .then(data => {
-      console.log('Success: ', data)
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
-  // .then(data => store.merge(apod, data))
+    .then(data => store.merge(apod, data))
+  debugger
   console.debug('apod is now ' + store.get('apod'))
   // return data
 }
