@@ -19,18 +19,21 @@ app.get('/apod', async (req, res) => {
   try {
     const image = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${process.env.API_KEY}`)
       .then(res => res.json())
+      Object.entries(image).forEach(image => {
+        console.log(image)
+      })
     res.send({ image })
-    console.log(path)
   } catch (err) {
     console.log('error:', err)
   }
 })
 
-app.get('(/mars-photos.{0,150})', async (req, res) => {
+app.get('/mars-photos*', async (req, res) => {
   try {
-    const image = await fetch(`https://api.nasa.gov` + req.params[0] + `?api_key=${process.env.API_KEY}`)
+    const photos = await fetch(`https://api.nasa.gov/mars-photos${req.params[0]}?api_key=${process.env.API_KEY}`)
       .then(res => res.json())
-    res.send({ image })
+    res.send({ photos })
+    console.log('fetched https://api.nasa.gov/mars-photos' + req.params[0] + '?api_key=${process.env.API_KEY}')
   } catch (err) {
     console.log('error:', err)
   }

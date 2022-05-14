@@ -4,7 +4,7 @@ body {
   flex-direction: column;
   font-family: Helvetica;
   min-height: 100vh;
-  color:white;
+  color:#d6d6d6;
   background-color: black;
 }
 
@@ -25,9 +25,25 @@ img {
   height: 90%;
 }
 
-td {
+table.roverTextTable {
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+  color:#9797ff
+}
+
+td.welcomeTable {
   border: 1px;
   text-align: left;
+}
+
+.ltblue {
+  color: #9797ff;
+}
+
+.ltgrey {
+  color:#d6d6d6;
 }
 
 .navbar {
@@ -48,7 +64,7 @@ td {
   /* background-image: linear-gradient(#00003d, black); */
   background-color: #00002d;
   border: none;
-  color: white;
+  color: #d6d6d6;
   padding: 15px 32px;
   text-align: center;
   text-decoration: bold;
@@ -83,9 +99,11 @@ td {
 /* ---- GRID ALL SIZES ---- */
 .grid-item {
   background-color: #00002d;
+  font-family: Helvetica;
+  font-style: normal;
   text-align: center;
   padding: 10px;
-  font-size: 16px;
+  font-size: 15px;
   border-radius: 10px;
   border-bottom-width: 10px;
   justify-content: space-evenly;
