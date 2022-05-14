@@ -21,8 +21,13 @@ footer {
 }
 
 img {
-  width: 100%;
-  height: auto;
+  width: 90%;
+  height: 90%;
+}
+
+td {
+  border: 1px;
+  text-align: left;
 }
 
 .navbar {
@@ -59,9 +64,10 @@ img {
 
 /* ---- GRID ALL SIZES ---- */
 .grid-item {
-  background-color: #2196F3;
+  background-color: #001526;
   text-align: center;
-  font-size: 30px;
+  padding: 10px;
+  font-size: 16px;
   border-radius: 10px;
   border-bottom-width: 10px;
   justify-content: space-evenly;
