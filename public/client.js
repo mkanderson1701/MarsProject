@@ -1,62 +1,15 @@
 /**
  * Global immutable datastore
- * 
- * I'm not using this for a lot other than APOD because it's
- * not very functional to store all the API data here
- * 
+ *
+ * I'm not using this for more than APOD, because it's
+ * not very "functional" to store all the API data here
+ *
  */
 
 let state = Immutable.fromJS({
-  rovers: ['Curiosity', 'Opportunity', 'Spirit'],
+  rovers: ['curiosity', 'opportunity', 'spirit'],
   apod: ''
 })
-
-// temporary, move me
-const root = document.getElementById('root')
-
-/**
- * Load APOD and initialize display
- */
-
-window.addEventListener('load', () => {
-  console.debug('init start')
-  if (!apodCurrent()) {
-    console.log('running init')
-    initApod()
-  }
-})
-
-const apodCurrent = () => {
-  const today = new Date()
-  const photodate = new Date(state.get('apod').date)
-  console.debug('stored APOD date is ' + photodate)
-  console.debug('today is ' + today)
-  if (photodate.getDate() !== today.getDate()) {
-    return false
-  } else { return true }
-}
-
-const initApod = async () => {
-  const queryData = await fetchQuery('/apod')
-  state = state.setIn(['apod'], queryData.image)
-  console.log('testing state: ' + state.getIn(['apod', 'explanation']))
-  const apodText = '<div class="grid-item"><table><td style="width:50%">' +
-    '<a href="' + state.getIn(['apod', 'hdurl']) + '">' +
-    '<img src="' + state.getIn(['apod', 'url']) + '" ' +
-    'alt="' + state.getIn(['apod', 'title']) + '"></a></td>' +
-    '<td style="width:50%">' + state.getIn(['apod', 'explanation'])
-    '</td></table></div>'
-  document.getElementById('box0').innerHTML = apodText
-/**   document.getElementById('box1').innerHTML = apodText
-  document.getElementById('box2').innerHTML = apodText
-  document.getElementById('box3').innerHTML = apodText
-  document.getElementById('box4').innerHTML = apodText
-  document.getElementById('box5').innerHTML = apodText
-  document.getElementById('box6').innerHTML = apodText
-  document.getElementById('box7').innerHTML = apodText
-  document.getElementById('box8').innerHTML = apodText
-*/
-}
 
 const fetchQuery = async (path) => {
   const urlPrefix = 'http://localhost:3000'
@@ -68,18 +21,67 @@ const fetchQuery = async (path) => {
   return jsonData
 }
 
-// let oRes = {}
-//
-// fetch(urlPrefix + path)
-//   .then(qRes => qRes.json())
-//   .then(jRes => {
-//     oRes = jRes
-//   })
-//   .catch((error) => {
-//     console.error('Error:', error)
-//   })
-// console.log('oRes date is ' + oRes.image.date)
+const drawAPOD = async () => {
+  const apodText = '<div class="grid-item"><table><td style="width:50%">' +
+    '<a href="' + state.getIn(['apod', 'hdurl']) + '">' +
+    '<img src="' + state.getIn(['apod', 'url']) + '" ' +
+    'alt="' + state.getIn(['apod', 'title']) + '"></a></td>' +
+    '<td style="width:50%">' + state.getIn(['apod', 'explanation']) +
+    '</td></table></div>'
+  document.getElementById('box0').innerHTML = apodText
+}
+
+/**
+ * Load APOD and initialize display
+ */
+
+const apodCurrent = () => {
+  const today = new Date()
+  const photodate = new Date(state.get('apod').date)
+  if (photodate.getDate() !== today.getDate()) {
+    return false
+  } else {
+    console.debug('apodCurrent returning true')
+    return true
+  }
+}
+
+const initApod = async () => {
+  const queryData = await fetchQuery('/apod')
+  state = state.setIn(['apod'], queryData.image)
+  drawAPOD()
+}
+
+
+
+
+
+const setupGrid = async (roverName) => {
+  //
+}
 
 function showError (message) {
   alert(message)
 }
+
+
+
+
+
+
+
+/**
+ * Load APOD and initialize display
+ */
+
+ window.addEventListener('load', () => {
+  if (!apodCurrent()) {
+    initApod()
+  } else {
+    drawAPOD()
+  }
+})
+
+document.getElementById('click-c').addEventListener('click', setupGrid('curiosity'));
+document.getElementById('click-o').addEventListener('click', setupGrid('opportunity'));
+document.getElementById('click-s').addEventListener('click', setupGrid('spirit'));
