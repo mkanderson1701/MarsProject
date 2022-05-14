@@ -17,19 +17,18 @@ app.use('/', express.static(path.join(__dirname, '../public')))
 // example API call
 app.get('/apod', async (req, res) => {
   try {
-    //console.log(req.params[0])
-    //debugger
     const image = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${process.env.API_KEY}`)
       .then(res => res.json())
     res.send({ image })
+    console.log(path)
   } catch (err) {
     console.log('error:', err)
   }
 })
 
-app.get('/mars-photos/.*', async (req, res) => {
+app.get('(/mars-photos.{0,150})', async (req, res) => {
   try {
-    const image = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${process.env.API_KEY}`)
+    const image = await fetch(`https://api.nasa.gov` + req.params[0] + `?api_key=${process.env.API_KEY}`)
       .then(res => res.json())
     res.send({ image })
   } catch (err) {
