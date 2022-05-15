@@ -100,6 +100,56 @@ td.welcomeTable {
   text-decoration: none;
 }
 
+.select-grid-container {
+  display: grid;
+  background-color: #000000;
+  padding-top: 0px;
+  border: 0px;
+  grid-template-columns: auto;
+  grid-template-rows: 20px;
+}
+
+/* ---- APOD GRID ---- */
+.select-grid-item {
+  background-color: #00002d;
+  font-family: Helvetica;
+  font-style: normal;
+  text-align: center;
+  padding: 0px;
+  font-size: 16px;
+  border-radius: 0px;
+  padding-top: 0px;
+  justify-content: space-evenly;
+  justify-items: center;
+  align-content: space-evenly;
+  align-items: center;
+}
+
+.apod-grid-container {
+  display: grid;
+  padding-top: 0px;
+  background-color: #151c21;
+  border: 10px;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: auto;
+}
+
+/* ---- APOD GRID ---- */
+.apod-grid-item {
+  background-color: #00002d;
+  font-family: Helvetica;
+  font-style: normal;
+  text-align: center;
+  padding: 0px;
+  font-size: 16px;
+  border-radius: 0px;
+  padding-top: 10px;
+  justify-content: space-evenly;
+  justify-items: center;
+  align-content: space-evenly;
+  align-items: center;
+}
+
 /* ---- GRID ALL SIZES ---- */
 .grid-item {
   background-color: #00002d;
@@ -125,10 +175,12 @@ td.welcomeTable {
 /* ---- GRID ALL SIZES ---- */
 .grid-containter {
   display: grid;
-  padding-top: 100px;
+  padding-top: 0px;
   background-color: #151c21;
   border: 10px;
 }
+
+
 
 /* ---- SMALL SCREEN ---- */
 @media (min-width: 400px) {

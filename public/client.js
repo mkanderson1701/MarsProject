@@ -35,13 +35,14 @@ const fetchQuery = async (path) => {
 }
 
 const drawAPOD = async () => {
-  const apodText = '<div class="grid-item"><table><td style="width:50%" class="welcomeTable">' +
+  const apodText = '<div class="apod-grid-item"></div>' +
+    '<div class="apod-grid-item">' +
     `<a href="${state.getIn(['apod', 'hdurl'])}">` +
     `<img src="${state.getIn(['apod', 'url'])}" ` +
-    `alt="${state.getIn(['apod', 'title'])}"></a></td>` +
-    `<td class="welcomeTable" style="width:50%">${state.getIn(['apod', 'explanation'])}` +
-    '</td></table></div>'
-  document.getElementById('griditems').innerHTML = apodText
+    `alt="${state.getIn(['apod', 'title'])}"></a>` +
+    `<p>${state.getIn(['apod', 'explanation'])}` +
+    '</div><div class="apod-grid-item"></div>'
+  document.getElementById('apodgriditems').innerHTML = apodText
 }
 
 const apodCurrent = () => {
@@ -175,6 +176,7 @@ function drawGrid (grid) {
   grid.forEach((value) => {
     gridText = gridText + value
   })
+  document.getElementById('apodgriditems').innerHTML = ''
   document.getElementById('griditems').innerHTML = gridText
 }
 
