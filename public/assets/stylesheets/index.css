@@ -21,8 +21,8 @@ footer {
 }
 
 img {
-  width: 90%;
-  height: 90%;
+  max-width: 90%;
+  max-height: 90%;
 }
 
 table.roverTextTable {
@@ -44,6 +44,10 @@ td.welcomeTable {
 
 .ltgrey {
   color:#d6d6d6;
+}
+
+.brtgreen {
+  color:#00ff00
 }
 
 .navbar {
@@ -110,6 +114,12 @@ td.welcomeTable {
   justify-items: center;
   align-content: space-evenly;
   align-items: center;
+  grid-template-areas: '.';
+}
+
+.pic-container {
+  display: grid;
+  grid-template-areas: '.';
 }
 
 /* ---- GRID ALL SIZES ---- */
@@ -122,9 +132,7 @@ td.welcomeTable {
 
 /* ---- SMALL SCREEN ---- */
 @media (min-width: 400px) {
-  /* one column */
-
-  .grid-container {
+.grid-container {
     display: grid;
     grid-template-areas: '.';
     gap: 25px 10px;
@@ -135,8 +143,7 @@ td.welcomeTable {
 /* ---- MEDIUM SCREEN --------- */
 
 @media (min-width: 1200px) {
-  /* three columns */
-  .grid-container {
+.grid-container {
     display: grid;
     grid-template-areas: '. .';
     gap: 10px 10px;
@@ -145,8 +152,7 @@ td.welcomeTable {
 }
 
 @media (min-width: 1500px) {
-  /* three columns */
-  .grid-container {
+.grid-container {
     display: grid;
     grid-template-areas: '. . .';
     gap: 10px 10px;

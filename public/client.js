@@ -11,11 +11,10 @@
  */
 
 let state = Immutable.fromJS({
-  rovers: ['curiosity', 'opportunity', 'spirit'],
-  apod: ''
+  apod: {}
 })
 
-let manifest = {
+const manifest = {
   curiosity: {},
   opportunity: {},
   spirit: {}
@@ -102,47 +101,95 @@ const initApod = async () => {
 }
 
 const initManifests = async () => {
-  // Curiosity is still going so pull manifest from API
-  const queryData = await fetchQuery(`/mars-photos/api/v1/manifests/Curiosity`)
-  manifest.curiosity = queryData.photos.photo_manifest
-  // 
-  debugger
+  const opportunityURL = 'https://mkanderson71.github.io/MarsProject/public/assets/data/opportunityManifest.json'
+  const spiritURL = 'https://mkanderson71.github.io/MarsProject/public/assets/data/spiritManifest.json'
+
+  // Curiosity is still going today, so pull live manifest from API
+  const queryCData = await fetchQuery(`/mars-photos/api/v1/manifests/Curiosity`)
+  manifest.curiosity = queryCData.photos.photo_manifest
+
+  // Grab Opportunity from githubpages
+  const oResponse = await fetch(opportunityURL)
+  const oJSON = await oResponse.json()
+  manifest.opportunity = oJSON.photo_manifest
+
+  // Grab Spirit from githubpages
+  const sResponse = await fetch(spiritURL)
+  const sJSON = await sResponse.json()
+  manifest.spirit = sJSON.photo_manifest
+
+  manifest.curiosity.factHTML = '<h2><i>Curiosity</i> Rover</h2>' +
+  '<table class="roverTextTable">' +
+  '<tr><td class="ltblue" style="width:35%">Launch Date</td><td class="ltgrey">November 26, 2011 UTC</td></tr>' +
+  '<tr><td>Launch Vehicle</td><td class="ltgrey">Atlas V 541</td></tr>' +
+  '<tr><td>Landing</td><td class="ltgrey">August 6, 2012</td></tr>' +
+  '<tr><td>Landing Site</td><td class="ltgrey">Gale Crater</td></tr>' +
+  '<tr><td>Mission End</td><td class="brtgreen" class="ltgrey">Mission In Progress</td></tr>' +
+  '</table>'
+  manifest.curiosity.linkHTML = 'https://mars.nasa.gov/mars-exploration/missions/mars-science-laboratory/'
+  manifest.curiosity.picHTML = 'assets/img/curiosity_marsbg.jpg'
+  manifest.curiosity.altHTML = 'Curiosity Rover'
+
+  manifest.opportunity.factHTML = '<h2><i>Opportunity</i> Rover</h2>' +
+  '<table class="roverTextTable">' +
+  '<tr><td class="ltblue" style="width:35%">Launch Date</td><td class="ltgrey">June 10, 2003 UTC</td></tr>' +
+  '<tr><td>Launch Vehicle</td><td class="ltgrey">Delta II 7925H (Delta II Heavy)</td></tr>' +
+  '<tr><td>Landing</td><td class="ltgrey">January 25, 2004</td></tr>' +
+  '<tr><td>Landing Site</td><td class="ltgrey">Meridiani Planum</td></tr>' +
+  '<tr><td>Mission End</td><td class="ltgrey">February 13, 2019</td></tr>' +
+  '</table>'
+  manifest.opportunity.linkHTML = 'https://mars.nasa.gov/mars-exploration/missions/mars-exploration-rovers/'
+  manifest.opportunity.picHTML = 'assets/img/spirit_opp_marsbg.jpg'
+  manifest.opportunity.altHTML = 'Opportunity Rover'
+
+  manifest.spirit.factHTML = '<h2><i>Spirit</i> Rover</h2>' +
+  '<table class="roverTextTable">' +
+  '<tr><td class="ltblue" style="width:35%">Launch Date</td><td class="ltgrey">June 10, 2003 UTC</td></tr>' +
+  '<tr><td>Launch Vehicle</td><td class="ltgrey">Delta II 7925</td></tr>' +
+  '<tr><td>Landing</td><td class="ltgrey">January 4, 2004</td></tr>' +
+  '<tr><td>Landing Site</td><td class="ltgrey">Gusev Crater</td></tr>' +
+  '<tr><td>Mission End</td><td class="ltgrey">March 22, 2010</td></tr>' +
+  '</table>'
+  manifest.spirit.linkHTML = 'https://mars.nasa.gov/mars-exploration/missions/mars-exploration-rovers/'
+  manifest.spirit.picHTML = 'assets/img/spirit_opp_marsbg.jpg'
+  manifest.spirit.altHTML = 'Spirit Rover'
 }
 
 const pullNasaData = async (rover) => {
   const queryData = await fetchQuery(`/mars-photos/api/v1/rovers/${rover}/latest_photos`)
   let roverData = queryData
-  debugger
 }
 
-const makeOppGrid = () => {
-  const gridText = '<div class="grid-item"><table><tr>' +
-    '<a href="https://mars.nasa.gov/mars-exploration/missions/mars-exploration-rovers/">' +
-    '<img src="assets/img/spirit_opp_marsbg.jpg" ' +
-    'alt="Opportunity Rover"></a></tr>' +
-    '<tr>' + roverFactTxt('opportunity') +
-    '</tr></table></div>'
+const makePrime = (rover) => {
+  const gridText = '<div class="grid-item">' +
+    `<a href="${manifest[rover].linkHTML}">` +
+    `<img src="${manifest[rover].picHTML}" ` +
+    `alt="${manifest[rover].altHTML}"></a>` +
+    `${manifest[rover].factHTML}` +
+    '</div>'
   return gridText
 }
 
-const drawGrid = (grid) => {
-
-
-  // TODO: Update this to dump entire grid at once instead of div by div
-  grid.forEach((value, index) => {
-    document.getElementById('griditems').innerHTML = value
-    console.log(index + ' ' + value)
+function drawGrid (grid) {
+  let gridText = ''
+  grid.forEach((value) => {
+    gridText = gridText + value
   })
+  document.getElementById('griditems').innerHTML = gridText
 }
 
 const setupGrid = (roverName) => {
   console.debug('setupgrid running for ' + roverName)
   const grid = []
-  switch (roverName) {
-    case 'opportunity':
-      grid[0] = makeOppGrid()
-  }
-  const nasaData = pullNasaData(roverName)
+  grid[0] = makePrime(roverName)
+  grid[1] = makePrime(roverName)
+  grid[2] = makePrime(roverName)
+
+  // switch (roverName) {
+  //   case 'opportunity':
+  //   grid[0] = makeOppGrid()
+  // }
+  // const nasaData = pullNasaData(roverName)
   drawGrid(grid)
 }
 
