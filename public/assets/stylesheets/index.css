@@ -194,7 +194,7 @@ td.welcomeTable {
 
 /* ---- MEDIUM SCREEN --------- */
 
-@media (min-width: 1200px) {
+@media (min-width: 850px) {
 .grid-container {
     display: grid;
     grid-template-areas: '. .';
@@ -203,7 +203,7 @@ td.welcomeTable {
   }
 }
 
-@media (min-width: 1500px) {
+@media (min-width: 1200px) {
 .grid-container {
     display: grid;
     grid-template-areas: '. . .';

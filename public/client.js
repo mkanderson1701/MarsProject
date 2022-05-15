@@ -180,21 +180,19 @@ function drawGrid (grid) {
   document.getElementById('griditems').innerHTML = gridText
 }
 
-const setupGrid = (roverName) => {
+function drawPageControl(rover) {
+  
+}
+
+const setupRoverMain = (roverName) => {
   console.debug('setupgrid running for ' + roverName)
   const grid = []
   grid[0] = makePrime(roverName)
   grid[1] = makePrime(roverName)
   grid[2] = makePrime(roverName)
-
-  // switch (roverName) {
-  //   case 'opportunity':
-  //   grid[0] = makeOppGrid()
-  // }
-  // const nasaData = pullNasaData(roverName)
   drawGrid(grid)
+  drawPageControl(roverName)
 }
-
 
 window.addEventListener('load', () => {
   if (!apodCurrent()) {
@@ -204,9 +202,9 @@ window.addEventListener('load', () => {
   }
   initManifests()
   document.getElementById('clickcur')
-    .addEventListener('click', function () { setupGrid('curiosity') })
+    .addEventListener('click', function () { setupRoverMain('curiosity') })
   document.getElementById('clickopp')
-    .addEventListener('click', function () { setupGrid('opportunity') })
+    .addEventListener('click', function () { setupRoverMain('opportunity') })
   document.getElementById('clickspi')
-    .addEventListener('click', function () { setupGrid('spirit') })
+    .addEventListener('click', function () { setupRoverMain('spirit') })
 })
