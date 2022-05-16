@@ -62,45 +62,6 @@ const apodCurrent = () => {
   }
 }
 
-const roverFactTxt = (roverName) => {
-  let roverFacts = ''
-  switch (roverName) {
-    case 'spirit':
-      console.debug('building spirit facts')
-      roverFacts = '<h2><i>Opportunity</i> Rover</h2>' +
-      '<table class="roverTextTable">' +
-      '<tr><td class="ltblue" style="width:35%">Launch Date</td><td class="ltgrey">June 10, 2003 UTC</td></tr>' +
-      '<tr><td>Launch Vehicle</td><td class="ltgrey">Delta II 7925H (Delta II Heavy)</td></tr>' +
-      '<tr><td>Landing</td><td class="ltgrey">January 25, 2004</td></tr>' +
-      '<tr><td>Landing Site</td><td class="ltgrey">Meridiani Planum</td></tr>' +
-      '<tr><td>Mission End</td><td class="ltgrey">February 13, 2019</td></tr>' +
-      '</table>'
-      break
-    case 'opportunity':
-      console.debug('building opportunity facts')
-      roverFacts = '<h2><i>Opportunity</i> Rover</h2>' +
-      '<table class="roverTextTable">' +
-      '<tr><td class="ltblue" style="width:35%">Launch Date</td><td class="ltgrey">June 10, 2003 UTC</td></tr>' +
-      '<tr><td>Launch Vehicle</td><td class="ltgrey">Delta II 7925H (Delta II Heavy)</td></tr>' +
-      '<tr><td>Landing</td><td class="ltgrey">January 25, 2004</td></tr>' +
-      '<tr><td>Landing Site</td><td class="ltgrey">Meridiani Planum</td></tr>' +
-      '<tr><td>Mission End</td><td class="ltgrey">February 13, 2019</td></tr>' +
-      '</table>'
-      break
-    case 'curiosity':
-      console.debug('building curiosity facts')
-      roverFacts = '<h2><i>Opportunity</i> Rover</h2>' +
-      '<table class="roverTextTable">' +
-      '<tr><td class="ltblue" style="width:35%">Launch Date</td><td class="ltgrey">June 10, 2003 UTC</td></tr>' +
-      '<tr><td>Launch Vehicle</td><td class="ltgrey">Delta II 7925H (Delta II Heavy)</td></tr>' +
-      '<tr><td>Landing</td><td class="ltgrey">January 25, 2004</td></tr>' +
-      '<tr><td>Landing Site</td><td class="ltgrey">Meridiani Planum</td></tr>' +
-      '<tr><td>Mission End</td><td class="ltgrey">February 13, 2019</td></tr>' +
-      '</table>'
-  }
-  return roverFacts
-}
-
 const initApod = async () => {
   const queryData = await fetchQuery('/apod')
   state = state.setIn(['apod'], queryData.image)
@@ -112,7 +73,7 @@ const initManifests = async () => {
   const spiritURL = 'https://mkanderson71.github.io/MarsProject/public/assets/data/spiritManifest.json'
 
   // Curiosity is still going today, so pull live manifest from API
-  const queryCData = await fetchQuery(`/mars-photos/api/v1/manifests/Curiosity`)
+  const queryCData = await fetchQuery('/mars-photos/api/v1/manifests/Curiosity')
   manifest.curiosity = queryCData.photos.photo_manifest
 
   // Grab Opportunity from githubpages
@@ -162,11 +123,6 @@ const initManifests = async () => {
   manifest.spirit.altHTML = 'Spirit Rover'
 }
 
-const fGetNasaData = async (query) => {
-  const queryData = await fetchQuery(`/mars-photos/api/v1/rovers/${rover}/latest_photos`)
-  let roverData = queryData
-}
-
 const makePrime = (rover) => {
   const gridText = '<div class="grid-item">' +
     `<a href="${manifest[rover].linkHTML}">` +
@@ -186,7 +142,7 @@ function drawGrid (grid) {
   document.getElementById('griditems').innerHTML = gridText
 }
 
-function drawPageControl(rover) {
+function drawPageControl (rover) {
   // These dates are in the same format as HTML requires so no conversion, just a string
   const startDate = manifest[rover].photos[0].earth_date
   const endDate = manifest[rover].photos[(manifest[rover].photos.length - 1)].earth_date
