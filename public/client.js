@@ -25,13 +25,15 @@ const paging = {
   index: 0
 }
 
+const IMG_PER_PAGE = 6
+
 function showError (message) {
   alert(message)
 }
 
 const fetchQuery = async (path, uriComp = '') => {
   const urlPrefix = 'http://localhost:3000'
-  uriComp = encodeURIComponent(uriComp)
+  uriComp = encodeURIComponent(uriComp) // if I sent this param it includes a question mark
   const rawData = await fetch(urlPrefix + path + uriComp)
   if (!rawData.ok) {
     showError('Error fetching ' + urlPrefix + path + uriComp)
@@ -147,17 +149,16 @@ function drawPageControl (rover) {
   const startDate = manifest[rover].photos[0].earth_date
   const endDate = manifest[rover].photos[(manifest[rover].photos.length - 1)].earth_date
   const pageText = '<div id="datepaging" class="paging-grid-item">' +
-    '<label>Date' +
     `<input class="pagedate" type="date" id="dateSelected" value="${startDate}" min="${startDate}" max="${endDate}">` +
     '<button class="pagebtn" id="clickdate"><u>[GO]</u></button>' +
-    '</label></div>' +
-    '<div id="pictotpaging" class="paging-grid-item"></div>' +
+    '</div>' +
+    // '<div id="pictotpaging" class="paging-grid-item"></div>' +
     '<div id="buttonpaging" class="paging-grid-item"></div>' +
     '<div id="selectcampaging" class="paging-grid-item"></div>'
   document.getElementById('paginggrid').innerHTML = pageText
 }
 
-// HOF called by filter, returns function matchCam
+// HOF called by Object.entries below, returns function matchCam
 const camTester = (camera) => {
   function matchCam (element) {
     if (element.camera.name === camera) {
@@ -167,19 +168,19 @@ const camTester = (camera) => {
   return matchCam
 }
 
-function buildCamSelect (iData, rover) {
+function buildCamSelect (iDataPP, rover) {
   const dateCamSelect = {}
-  dateCamSelect.FHAZ = iData.photos.photos.filter(camTester('FHAZ'))
-  dateCamSelect.RHAZ = iData.photos.photos.filter(camTester('RHAZ'))
-  dateCamSelect.NAVCAM = iData.photos.photos.filter(camTester('NAVCAM'))
+  dateCamSelect.FHAZ = iDataPP.filter(camTester('FHAZ'))
+  dateCamSelect.RHAZ = iDataPP.filter(camTester('RHAZ'))
+  dateCamSelect.NAVCAM = iDataPP.filter(camTester('NAVCAM'))
   if (rover === 'spirit' || rover === 'opportunity') {
-    dateCamSelect.PANCAM = iData.photos.photos.filter(camTester('PANCAM'))
-    dateCamSelect.MINITES = iData.photos.photos.filter(camTester('MINITES'))
+    dateCamSelect.PANCAM = iDataPP.filter(camTester('PANCAM'))
+    dateCamSelect.MINITES = iDataPP.filter(camTester('MINITES'))
   } else {
-    dateCamSelect.MAST = iData.photos.photos.filter(camTester('MAST'))
-    dateCamSelect.CHEMCAM = iData.photos.photos.filter(camTester('CHEMCAM'))
-    dateCamSelect.MAHLI = iData.photos.photos.filter(camTester('MAHLI'))
-    dateCamSelect.MARDI = iData.photos.photos.filter(camTester('MARDI'))
+    dateCamSelect.MAST = iDataPP.filter(camTester('MAST'))
+    dateCamSelect.CHEMCAM = iDataPP.filter(camTester('CHEMCAM'))
+    dateCamSelect.MAHLI = iDataPP.filter(camTester('MAHLI'))
+    dateCamSelect.MARDI = iDataPP.filter(camTester('MARDI'))
   }
   for (const [key, value] of Object.entries(dateCamSelect)) { // delete cameras with no pics this day
     if (value.length === 0) {
@@ -190,29 +191,102 @@ function buildCamSelect (iData, rover) {
   return dateCamSelect
 }
 
-// pull first images for date
-
-async function initImageGrid (rover, date) {
-  console.debug(date)
-  // second param for fetchQuery calls encodeURIComponent on it
-  const iData = await fetchQuery(`/mars-photos/api/v1/rovers/${rover}/photos`, `?earth_date=${date}`)
-  // TODO: Draw grid of pics 0-24
-  paging.rover = rover
-  paging.index = 0
-  const dateCamSelect = buildCamSelect(iData, rover)
-  debugger
-  // setupPageNav(iData.photos.photos.length, manifest[rover].)
+const drawCamSelect = (camSelect) => {
+  let selectTxt = '<label for="camera"><select name ="camera" id="camera" class="pagebtnselect">' +
+    '<option value="ALL">All Cameras</option>'
+  for (const [key, value] of Object.entries(camSelect)) {
+    selectTxt = selectTxt + `<option value="${key}">${key}(${value.length})</option>`
+  }
+  document.getElementById('selectcampaging').innerHTML = selectTxt
 }
 
-function setupPageNav (numPhotos) {
-  console.log('numPhotos is ' + numPhotos)
-  document.getElementById('pictotpaging').innerHTML = `${numPhotos} Total Photos`
-  buttonTxt = '<button class="pagebtn" id="backall">|<</button>' +
-    '<button class="pagebtn" id="backone"><</button>' +
-    '<button class="pagebtn" id="fwdone">></button>' +
-    '<button class="pagebtn" id="fwdall">>|</button>'
+// iData is pic data from NASA API
+// index is first picture to render
+// iCamArray (optional) should be one array from the iCameras object,
+// i.e. send iCameras.FHAZ with just photo elements
+function buildPicGrid (iDataPP, index, iCamArray) {
+  if (!iCamArray) {
+    console.log('initializing for all cameras')
+    let gridText = ''
+    for (let i = index; i < Math.min(index + IMG_PER_PAGE, iDataPP.length); i++) {
+      gridText = gridText + '<div class="grid-item">' +
+        // `<a href="${iDataPP[i].img_src.replace('http://', 'https://')}">` +
+        `<a href="${iDataPP[i].img_src}">` +
+        `<img src="${iDataPP[i].img_src}" alt="${iDataPP[i].camera.full_name}"></a>` + 
+        `<p>${iDataPP[i].camera.full_name} (${iDataPP[i].camera.name})` +
+        '</div>'
+    }
+    return gridText
+  } else {
+    console.log('iCamArray defined')
+  }
+}
+
+function pageFwd (iDataPP) {
+  paging.index += IMG_PER_PAGE
+  drawNextPage(iDataPP, paging.index)
+}
+
+function updatePageSelect (index, length, iDataPP) {
+  if (index + IMG_PER_PAGE < length - 1) { // Enable the FORWARD button
+    document.getElementById("fwdone").className = 'pagebtnconton'
+    document.getElementById('fwdone')
+      .addEventListener('click', pageFwd(iDataPP))
+  } else { // DISABLE the FORWARD button
+    document.getElementById("fwdone").className = 'pagebtncontoff'
+    document.getElementById('fwdone')
+      .removeEventListener('click', pageFwd)
+  }
+  if (index > 0) {
+    document.getElementById("backone").className = 'pagebtnconton'
+  }
+}
+
+function drawNextPage (iDataPP, index) {
+  const gridText = buildPicGrid(iDataPP, index)
+  document.getElementById('griditems').innerHTML = gridText
+  updatePageSelect(index, iDataPP.length, iDataPP)
+  debugger
+}
+
+//
+// Once a date is selected, assemble the full page
+//
+async function initImageGrid (rover, date) {
+  console.debug(date)
+  // second param for fetchQuery calls encodeURIComponent on it because ? no bueno
+  const iData = await fetchQuery(`/mars-photos/api/v1/rovers/${rover}/photos`, `?earth_date=${date}`)
+
+  paging.rover = rover
+  paging.index = 0
+  if (iData.photos.photos.length === 0) {
+    // if there are no photos on this mission date, return
+    alert(`Sorry, ${manifest[rover].name} did not send any photos back to Earth on ${date}.`)
+    return
+  }
+
+  // Draw main grid
+  const gridText = buildPicGrid(iData.photos.photos, paging.index)
+  document.getElementById('griditems').innerHTML = gridText
+
+  // Photo page navigation buttons, fwd, back etc
+  setupPageNav(iData.photos.photos.length + 1)
+
+  // Dropdown for camera type
+  const iCameras = buildCamSelect(iData.photos.photos, rover)
+  drawCamSelect(iCameras)
+
+  // updatePageSelect(paging.index, iData.photos.photos.length, iData.photos.photos)
+  debugger
+}
+
+function setupPageNav (numPics) {
+  console.log('numPics is ' + numPics)
+  // document.getElementById('pictotpaging').innerHTML = `${numPics} Total Photos`
+  const buttonTxt = '<button class="pagebtncontoff" id="backone"><<</button>' +
+    '<button class="pagebtncontoff" id="fwdone">>></button>'
   document.getElementById('buttonpaging').innerHTML = buttonTxt
-  selectTxt = '<select '
+  // selectTxt = '<select '
 }
 
 const setupRoverMain = (roverName) => {
