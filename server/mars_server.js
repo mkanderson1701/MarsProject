@@ -12,31 +12,34 @@ app.use(bodyParser.json())
 
 app.use('/', express.static(path.join(__dirname, '../public')))
 
-// your API calls
-
-// example API call
+// Request for image of the day
 app.get('/apod', async (req, res) => {
   try {
     const image = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${process.env.API_KEY}`)
       .then(res => res.json())
-      Object.entries(image).forEach(image => {
-        console.log(image)
-      })
     res.send({ image })
   } catch (err) {
-    console.log('error:', err)
+    console.error('error: ', err)
   }
 })
 
+// Request to API path permitted
 app.get('/mars-photos*', async (req, res) => {
   try {
-    const photos = await fetch(`https://api.nasa.gov/mars-photos${req.params[0]}?api_key=${process.env.API_KEY}`)
+    let query = ''
+    console.log(req.params[0])
+    if (req.params[0].includes('?')) {
+      query = `https://api.nasa.gov/mars-photos${req.params[0]}&api_key=${process.env.API_KEY}`
+    } else {
+      query = `https://api.nasa.gov/mars-photos${req.params[0]}?api_key=${process.env.API_KEY}`
+    }
+    const photos = await fetch(query)
       .then(res => res.json())
     res.send({ photos })
-    console.log('fetched https://api.nasa.gov/mars-photos' + req.params[0] + '?api_key=${process.env.API_KEY}')
+    console.log(`fetched ${query}`)
   } catch (err) {
-    console.log('error:', err)
+    console.error(`error: ${err} fetching ${query}`)
   }
 })
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`Express server listening on port ${port}...`))

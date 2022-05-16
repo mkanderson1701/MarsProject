@@ -80,7 +80,6 @@ td.welcomeTable {
 
 .navbuttons .navbtn:hover {
   background-color: #000000;
-  
 }
 
 .navbar li a {
@@ -100,29 +99,55 @@ td.welcomeTable {
   text-decoration: none;
 }
 
-.select-grid-container {
-  display: grid;
-  background-color: #000000;
-  padding-top: 0px;
-  border: 0px;
-  grid-template-columns: auto;
-  grid-template-rows: 20px;
+.paging-control {
+  background-color: #000361;
 }
 
-/* ---- APOD GRID ---- */
-.select-grid-item {
-  background-color: #00002d;
+.paging-grid-container {
+  display: grid;
+  background-color: #000361;
+  padding: 0px 5px;
+  border: 0px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 35px;
+  align-items: center;
+  grid-template-areas: '. . . .';
+}
+
+.paging-grid-item {
+  background-color: #000361;
   font-family: Helvetica;
   font-style: normal;
   text-align: center;
   padding: 0px;
-  font-size: 16px;
+  font-size: 15px;
   border-radius: 0px;
-  padding-top: 0px;
   justify-content: space-evenly;
   justify-items: center;
   align-content: space-evenly;
   align-items: center;
+}
+
+.pagebtn {
+  background-color: #003f00;
+  border: none;
+  border-radius: 4px;
+  color: #d6d6d6;
+  padding: 4px 4px;
+  margin-left: 5px;
+  text-align: center;
+  text-decoration: bold;
+  display: inline-block;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.pagedate {
+  margin-left: 2px;
+}
+
+.pagebtn:hover {
+  background-color: #009700
 }
 
 .apod-grid-container {
@@ -175,7 +200,7 @@ td.welcomeTable {
 /* ---- GRID ALL SIZES ---- */
 .grid-containter {
   display: grid;
-  padding-top: 0px;
+  padding-top: 10px;
   background-color: #151c21;
   border: 10px;
 }
@@ -187,8 +212,8 @@ td.welcomeTable {
 .grid-container {
     display: grid;
     grid-template-areas: '.';
-    gap: 25px 10px;
-    padding: 10px;
+    gap: 15px;
+    padding: 0px;
   }
 }
 
@@ -198,8 +223,8 @@ td.welcomeTable {
 .grid-container {
     display: grid;
     grid-template-areas: '. .';
-    gap: 10px 10px;
-    padding: 20px;
+    gap: 15px;
+    padding: 0px;
   }
 }
 
@@ -207,7 +232,7 @@ td.welcomeTable {
 .grid-container {
     display: grid;
     grid-template-areas: '. . .';
-    gap: 10px 10px;
-    padding: 25px;
+    gap: 15px;
+    padding: 0px;
   }
 }

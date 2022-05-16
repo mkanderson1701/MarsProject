@@ -20,15 +20,21 @@ const manifest = {
   spirit: {}
 }
 
+const paging = {
+  rover: '',
+  index: 0
+}
+
 function showError (message) {
   alert(message)
 }
 
-const fetchQuery = async (path) => {
+const fetchQuery = async (path, uriComp = '') => {
   const urlPrefix = 'http://localhost:3000'
-  const rawData = await fetch(urlPrefix + path)
+  uriComp = encodeURIComponent(uriComp)
+  const rawData = await fetch(urlPrefix + path + uriComp)
   if (!rawData.ok) {
-    showError('Error fetching ' + path)
+    showError('Error fetching ' + urlPrefix + path + uriComp)
   }
   const jsonData = await rawData.json()
   return jsonData
@@ -156,7 +162,7 @@ const initManifests = async () => {
   manifest.spirit.altHTML = 'Spirit Rover'
 }
 
-const pullNasaData = async (rover) => {
+const fGetNasaData = async (query) => {
   const queryData = await fetchQuery(`/mars-photos/api/v1/rovers/${rover}/latest_photos`)
   let roverData = queryData
 }
@@ -181,7 +187,76 @@ function drawGrid (grid) {
 }
 
 function drawPageControl(rover) {
-  
+  // These dates are in the same format as HTML requires so no conversion, just a string
+  const startDate = manifest[rover].photos[0].earth_date
+  const endDate = manifest[rover].photos[(manifest[rover].photos.length - 1)].earth_date
+  const pageText = '<div id="datepaging" class="paging-grid-item">' +
+    '<label>Date' +
+    `<input class="pagedate" type="date" id="dateSelected" value="${startDate}" min="${startDate}" max="${endDate}">` +
+    '<button class="pagebtn" id="clickdate"><u>[GO]</u></button>' +
+    '</label></div>' +
+    '<div id="pictotpaging" class="paging-grid-item"></div>' +
+    '<div id="buttonpaging" class="paging-grid-item"></div>' +
+    '<div id="selectcampaging" class="paging-grid-item"></div>'
+  document.getElementById('paginggrid').innerHTML = pageText
+}
+
+// HOF called by filter, returns function matchCam
+const camTester = (camera) => {
+  function matchCam (element) {
+    if (element.camera.name === camera) {
+      return true
+    }
+  }
+  return matchCam
+}
+
+function buildCamSelect (iData, rover) {
+  const dateCamSelect = {}
+  dateCamSelect.FHAZ = iData.photos.photos.filter(camTester('FHAZ'))
+  dateCamSelect.RHAZ = iData.photos.photos.filter(camTester('RHAZ'))
+  dateCamSelect.NAVCAM = iData.photos.photos.filter(camTester('NAVCAM'))
+  if (rover === 'spirit' || rover === 'opportunity') {
+    dateCamSelect.PANCAM = iData.photos.photos.filter(camTester('PANCAM'))
+    dateCamSelect.MINITES = iData.photos.photos.filter(camTester('MINITES'))
+  } else {
+    dateCamSelect.MAST = iData.photos.photos.filter(camTester('MAST'))
+    dateCamSelect.CHEMCAM = iData.photos.photos.filter(camTester('CHEMCAM'))
+    dateCamSelect.MAHLI = iData.photos.photos.filter(camTester('MAHLI'))
+    dateCamSelect.MARDI = iData.photos.photos.filter(camTester('MARDI'))
+  }
+  for (const [key, value] of Object.entries(dateCamSelect)) { // delete cameras with no pics this day
+    if (value.length === 0) {
+      delete dateCamSelect[key]
+      console.log('deleted' + key)
+    }
+  }
+  return dateCamSelect
+}
+
+// pull first images for date
+
+async function initImageGrid (rover, date) {
+  console.debug(date)
+  // second param for fetchQuery calls encodeURIComponent on it
+  const iData = await fetchQuery(`/mars-photos/api/v1/rovers/${rover}/photos`, `?earth_date=${date}`)
+  // TODO: Draw grid of pics 0-24
+  paging.rover = rover
+  paging.index = 0
+  const dateCamSelect = buildCamSelect(iData, rover)
+  debugger
+  // setupPageNav(iData.photos.photos.length, manifest[rover].)
+}
+
+function setupPageNav (numPhotos) {
+  console.log('numPhotos is ' + numPhotos)
+  document.getElementById('pictotpaging').innerHTML = `${numPhotos} Total Photos`
+  buttonTxt = '<button class="pagebtn" id="backall">|<</button>' +
+    '<button class="pagebtn" id="backone"><</button>' +
+    '<button class="pagebtn" id="fwdone">></button>' +
+    '<button class="pagebtn" id="fwdall">>|</button>'
+  document.getElementById('buttonpaging').innerHTML = buttonTxt
+  selectTxt = '<select '
 }
 
 const setupRoverMain = (roverName) => {
@@ -192,6 +267,8 @@ const setupRoverMain = (roverName) => {
   grid[2] = makePrime(roverName)
   drawGrid(grid)
   drawPageControl(roverName)
+  document.getElementById('clickdate')
+    .addEventListener('click', function () { initImageGrid(roverName, document.getElementById('dateSelected').value) })
 }
 
 window.addEventListener('load', () => {
