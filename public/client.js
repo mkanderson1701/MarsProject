@@ -2,23 +2,28 @@
  * Global immutable datastore
  *
  * I'm not using this for more than APOD, because it's
- * not very "functional" to store all the API data here
- *
- * note to self
- * https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity?&api_key=DEMO_KEY
- * sample manifest query
+ * not very practical to store changing, deeply nested API data here
  *
  */
 
+// eslint-disable-next-line no-undef
 let state = Immutable.fromJS({
   apod: {}
 })
+
+/**
+ * NASA manifest data
+ */
 
 const manifest = {
   curiosity: {},
   opportunity: {},
   spirit: {}
 }
+
+/**
+ * Page navigation state
+ */
 
 const paging = {
   rover: '',
@@ -27,15 +32,26 @@ const paging = {
   filter: 'ALL'
 }
 
+/**
+ * One day of image data, filtered when chosen
+ */
+
 let imageData = {}
 let imageFilt = {}
 
+// images are shown per page
 const IMG_PER_PAGE = 6
 
-function showError (message) {
+const showError = (message) => {
   alert(message)
 }
 
+// Pull URL from Express server
+// Hides API key
+//
+// If my query includes a question mark (query) I send it separately
+// so it can be encoded with URI component
+// since question mark messes with regex in Express
 const fetchQuery = async (path, uriComp = '') => {
   const urlPrefix = 'http://localhost:3000'
   uriComp = encodeURIComponent(uriComp) // if I sent this param it includes a question mark
@@ -47,9 +63,11 @@ const fetchQuery = async (path, uriComp = '') => {
   return jsonData
 }
 
+// Welcome / intro page
 const drawAPOD = async () => {
   const apodText = '<div class="apod-grid-item"></div>' +
     '<div class="apod-grid-item">' +
+    '<i>Please select a rover above!</i><p>' +
     `<a href="${state.getIn(['apod', 'hdurl'])}">` +
     `<img src="${state.getIn(['apod', 'url'])}" ` +
     `alt="${state.getIn(['apod', 'title'])}"></a>` +
@@ -58,23 +76,30 @@ const drawAPOD = async () => {
   document.getElementById('apodgriditems').innerHTML = apodText
 }
 
+// Check for new APOD
 const apodCurrent = () => {
   const today = new Date()
-  const photodate = new Date(state.get('apod').date)
-  if (photodate.getDate() !== today.getDate()) {
-    return false
-  } else {
-    console.debug('apodCurrent returning true')
+  const photoDate = new Date(state.get('apod').date)
+  return pureDateCheck(today, photoDate)
+}
+
+const pureDateCheck = (xDate, yDate) => {
+  if (xDate === yDate) {
     return true
   }
 }
 
+// Get new APOD welcome image
 const initApod = async () => {
   const queryData = await fetchQuery('/apod')
   state = state.setIn(['apod'], queryData.image)
   drawAPOD()
 }
 
+// Pull the manifest data from NASA
+//
+// Construct HTML for lander selection page
+//
 const initManifests = async () => {
   const opportunityURL = 'https://mkanderson71.github.io/MarsProject/public/assets/data/opportunityManifest.json'
   const spiritURL = 'https://mkanderson71.github.io/MarsProject/public/assets/data/spiritManifest.json'
@@ -130,8 +155,10 @@ const initManifests = async () => {
   manifest.spirit.altHTML = 'Spirit Rover'
 }
 
+// Date has been chosen, show rover page
 const makePrime = (rover) => {
   const gridText = '<div class="grid-item">' +
+    '<i>Select a Date</i><p>' +
     `<a href="${manifest[rover].linkHTML}">` +
     `<img src="${manifest[rover].picHTML}" ` +
     `alt="${manifest[rover].altHTML}"></a>` +
@@ -140,6 +167,7 @@ const makePrime = (rover) => {
   return gridText
 }
 
+// Give rover HTML, draw the grid
 function drawGrid (grid) {
   let gridText = ''
   grid.forEach((value) => {
@@ -149,8 +177,10 @@ function drawGrid (grid) {
   document.getElementById('griditems').innerHTML = gridText
 }
 
+// Draws the calendar / date selector
+
 function drawPageControl (rover) {
-  // These dates are in the same format as HTML requires so no conversion, just a string
+  // These dates are in the same format as the HTML requires so no conversion, just a string
   const startDate = manifest[rover].photos[0].earth_date
   const endDate = manifest[rover].photos[(manifest[rover].photos.length - 1)].earth_date
   const pageText = '<div id="datepaging" class="paging-grid-item">' +
@@ -163,7 +193,7 @@ function drawPageControl (rover) {
   document.getElementById('paginggrid').innerHTML = pageText
 }
 
-// HOF called by Object.entries below, returns function matchCam
+// HOF called by array filter below, returns function matchCam
 const camTester = (camera) => {
   function matchCam (element) {
     if (element.camera.name === camera) {
@@ -173,6 +203,7 @@ const camTester = (camera) => {
   return matchCam
 }
 
+// builds the camera drop-down box
 function buildCamSelect () {
   const dateCamSelect = {}
   dateCamSelect.FHAZ = imageData.filter(camTester('FHAZ'))
@@ -190,25 +221,27 @@ function buildCamSelect () {
   for (const [key, value] of Object.entries(dateCamSelect)) { // delete cameras with no pics this day
     if (value.length === 0) {
       delete dateCamSelect[key]
-      console.log('deleted' + key)
+      // console.log('deleted' + key)
     }
   }
   return dateCamSelect
 }
 
+// renders the camera drop-down box
 const drawCamSelect = (camSelect) => {
-  let selectTxt = '<label for="camera"><select name ="camera" id="camera" class="pagebtnselect">' +
+  let selectTxt = '<label for="camera"><select name ="camera" id="filterselect" class="filterselect">' +
     '<option value="ALL">All Cameras</option>'
   for (const [key, value] of Object.entries(camSelect)) {
-    selectTxt = selectTxt + `<option value="${key}">${key}(${value.length})</option>`
+    selectTxt = selectTxt + `<option value="${key}">${key} (${value.length})</option>`
   }
   document.getElementById('selectcamfilter').innerHTML = selectTxt
 }
 
+// assembles HTML for one grid of pictures
 function buildPicGrid () {
   let picArray = {}
   if (paging.filter !== 'ALL') {
-    picArray = imageFilt(paging.filter)
+    picArray = imageFilt
   } else {
     picArray = imageData
   }
@@ -217,28 +250,49 @@ function buildPicGrid () {
   for (let i = paging.index; i < Math.min(paging.index + IMG_PER_PAGE, picArray.length); i++) {
     gridText = gridText + '<div class="grid-item">' +
       `<a href="${picArray[i].img_src}">` +
-      `<img src="${picArray[i].img_src}" alt="${picArray[i].camera.full_name}"></a>` + 
+      `<img src="${picArray[i].img_src}" alt="${picArray[i].camera.full_name}"></a>` +
       `<p>${picArray[i].camera.full_name} (${picArray[i].camera.name})` +
+      `<p>(${i + 1} of ${paging.numToday})` +
       '</div>'
   }
   return gridText
 }
 
+const purePageForward = () => {
+  paging.index += IMG_PER_PAGE
+}
+
+const purePageBack = () => {
+  paging.index -= IMG_PER_PAGE
+}
+
+const purePageReset = () => {
+  paging.index = 0
+}
+
+// forward button clicked (EVENT)
 function pageFwd () {
-  if (paging.index + IMG_PER_PAGE < paging.numToday - 1) {
-    paging.index += IMG_PER_PAGE
+  if (paging.index + IMG_PER_PAGE < paging.numToday) {
+    purePageForward()
     drawNextPage()
   }
 }
 
+// back button clicked (EVENT)
 function pageBack () {
   if (paging.index > 0) {
-    paging.index -= IMG_PER_PAGE
-    if (paging.index < 0) { paging.index = 0 }
+    purePageBack()
+    if (paging.index < 0) {
+      purePageReset()
+    }
     drawNextPage()
   }
 }
 
+// after the page is created, or changes...
+//
+// update the forward and back button style so it's more obvious
+// whether they are working
 function updatePageSelect () {
   if (paging.index + IMG_PER_PAGE < imageData.length - 1) { // Enable the FORWARD button
     document.getElementById('fwdone').className = 'pagebtnconton'
@@ -250,29 +304,38 @@ function updatePageSelect () {
   } else { // unlight the BACK button
     document.getElementById('backone').className = 'pagebtncontoff'
   }
-  console.debug(`index: ${paging.index}, length: ${imageData.length}`)
+  // console.debug(`index: ${paging.index}, length: ${imageData.length}`)
 }
 
+// Draws next page
 function drawNextPage () {
   const gridText = buildPicGrid()
   document.getElementById('griditems').innerHTML = gridText
   updatePageSelect()
 }
 
-//
-// Once a date is selected, assemble the full page
-//
-async function initImageGrid (rover, date) {
-  console.debug(date)
-  // second param for fetchQuery calls encodeURIComponent on it because ? no bueno
-  const iData = await fetchQuery(`/mars-photos/api/v1/rovers/${rover}/photos`, `?earth_date=${date}`)
-
-  imageData = iData.photos.photos
-
+const pureInitPaging = (rover) => {
   paging.rover = rover
   paging.index = 0
   paging.numToday = imageData.length
   paging.filter = 'ALL'
+}
+
+const pureSetPagingNum = (numToday) => {
+  paging.numToday = numToday
+}
+
+//
+// Once a date is selected, assemble the full page
+//
+async function initImageGrid (rover, date) {
+  // console.debug(date)
+  // second param for fetchQuery calls encodeURIComponent on it because ? is bad
+  const iData = await fetchQuery(`/mars-photos/api/v1/rovers/${rover}/photos`, `?earth_date=${date}`)
+  imageData = iData.photos.photos // don't want to deal with the deep nesting
+
+  // (re)init pagenav state
+  pureInitPaging(rover)
 
   if (paging.numToday === 0) {
     // if there are no photos on this mission date, return
@@ -288,37 +351,43 @@ async function initImageGrid (rover, date) {
   setupPageNav()
 
   // Build dropdown for camera type
-  imageFilt = buildCamSelect()
-  drawCamSelect(imageFilt)
+  drawCamSelect(buildCamSelect()) // HOF HERE
 
+  // Update state on fwd/back buttons, may not need forward if a small number
   updatePageSelect()
+
   document.getElementById('fwdone')
-    .addEventListener('click', function () { pageFwd() })
+    .addEventListener('click', function () { pageFwd() }) // Event listeners are HOF's
   document.getElementById('backone')
     .addEventListener('click', function () { pageBack() })
-  document.getElementById('selectcamfilter')
+  document.getElementById('filterselect')
     .addEventListener('change', function () { clickFilter() })
 }
 
-function clickFilter() {
-  paging.filter = document.getElementById('selectcamfilter').value
-  console.debug(`select box says ${document.getElementById('selectcamfilter').value}`)
+// Camera drop down has been changed (EVENT)
+function clickFilter () {
+  paging.filter = document.getElementById('filterselect').value
+  // console.debug(`select box says ${document.getElementById('filterselect').value}`)
   paging.index = 0
-  debugger
-  paging.numToday = imageFilt[paging.filter].length
-  buildPicGrid()
+  imageFilt = imageData.filter(function (element, index, array) { // Array filter / HOF
+    return (array[index].camera.name === paging.filter)
+  })
+  pureSetPagingNum(imageFilt.length)
+  drawNextPage()
 }
 
+// Initialize page forward/back buttons
 function setupPageNav () {
   const buttonTxt = '<button class="pagebtncontoff" id="backone"><<</button>' +
     '<button class="pagebtncontoff" id="fwdone">>></button>'
   document.getElementById('buttonpaging').innerHTML = buttonTxt
 }
 
+// initialize page after date selection
 const setupRoverMain = (roverName) => {
   paging.rover = 'roverName'
   paging.index = 0
-  console.debug('setupgrid running for ' + roverName)
+  // console.debug('setupgrid running for ' + roverName)
   const grid = []
   grid[0] = makePrime(roverName)
   drawGrid(grid)
@@ -329,6 +398,7 @@ const setupRoverMain = (roverName) => {
     })
 }
 
+// page initialization
 window.addEventListener('load', () => {
   if (!apodCurrent()) {
     initApod()
