@@ -6,6 +6,7 @@ const path = require('path')
 
 const app = express()
 const port = 3000
+console.log(process.env)
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
@@ -38,7 +39,7 @@ app.get('/mars-photos*', async (req, res) => {
     res.send({ photos })
     console.log(`fetched ${query}`)
   } catch (err) {
-    console.error(`error: ${err} fetching ${query}`)
+    console.error(`error: ${err}`)
   }
 })
 

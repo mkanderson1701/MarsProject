@@ -55,6 +55,7 @@ const showError = (message) => {
 const fetchQuery = async (path, uriComp = '') => {
   const urlPrefix = 'http://localhost:3000'
   uriComp = encodeURIComponent(uriComp) // if I sent this param it includes a question mark
+  // console.debug('uriComp=' + uriComp)
   const rawData = await fetch(urlPrefix + path + uriComp)
   if (!rawData.ok) {
     showError('Error fetching ' + urlPrefix + path + uriComp)
@@ -401,8 +402,10 @@ const setupRoverMain = (roverName) => {
 // page initialization
 window.addEventListener('load', () => {
   if (!apodCurrent()) {
+    // console.debug('apod not current')
     initApod()
   } else {
+    // console.debug('apod   current')
     drawAPOD()
   }
   initManifests()
