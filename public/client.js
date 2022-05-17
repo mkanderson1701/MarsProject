@@ -22,8 +22,13 @@ const manifest = {
 
 const paging = {
   rover: '',
-  index: 0
+  index: 0,
+  numToday: 0,
+  filter: 'ALL'
 }
+
+let imageData = {}
+let imageFilt = {}
 
 const IMG_PER_PAGE = 6
 
@@ -154,7 +159,7 @@ function drawPageControl (rover) {
     '</div>' +
     // '<div id="pictotpaging" class="paging-grid-item"></div>' +
     '<div id="buttonpaging" class="paging-grid-item"></div>' +
-    '<div id="selectcampaging" class="paging-grid-item"></div>'
+    '<div id="selectcamfilter" class="paging-grid-item"></div>'
   document.getElementById('paginggrid').innerHTML = pageText
 }
 
@@ -168,19 +173,19 @@ const camTester = (camera) => {
   return matchCam
 }
 
-function buildCamSelect (iDataPP, rover) {
+function buildCamSelect () {
   const dateCamSelect = {}
-  dateCamSelect.FHAZ = iDataPP.filter(camTester('FHAZ'))
-  dateCamSelect.RHAZ = iDataPP.filter(camTester('RHAZ'))
-  dateCamSelect.NAVCAM = iDataPP.filter(camTester('NAVCAM'))
-  if (rover === 'spirit' || rover === 'opportunity') {
-    dateCamSelect.PANCAM = iDataPP.filter(camTester('PANCAM'))
-    dateCamSelect.MINITES = iDataPP.filter(camTester('MINITES'))
+  dateCamSelect.FHAZ = imageData.filter(camTester('FHAZ'))
+  dateCamSelect.RHAZ = imageData.filter(camTester('RHAZ'))
+  dateCamSelect.NAVCAM = imageData.filter(camTester('NAVCAM'))
+  if (paging.rover === 'spirit' || paging.rover === 'opportunity') {
+    dateCamSelect.PANCAM = imageData.filter(camTester('PANCAM'))
+    dateCamSelect.MINITES = imageData.filter(camTester('MINITES'))
   } else {
-    dateCamSelect.MAST = iDataPP.filter(camTester('MAST'))
-    dateCamSelect.CHEMCAM = iDataPP.filter(camTester('CHEMCAM'))
-    dateCamSelect.MAHLI = iDataPP.filter(camTester('MAHLI'))
-    dateCamSelect.MARDI = iDataPP.filter(camTester('MARDI'))
+    dateCamSelect.MAST = imageData.filter(camTester('MAST'))
+    dateCamSelect.CHEMCAM = imageData.filter(camTester('CHEMCAM'))
+    dateCamSelect.MAHLI = imageData.filter(camTester('MAHLI'))
+    dateCamSelect.MARDI = imageData.filter(camTester('MARDI'))
   }
   for (const [key, value] of Object.entries(dateCamSelect)) { // delete cameras with no pics this day
     if (value.length === 0) {
@@ -197,56 +202,61 @@ const drawCamSelect = (camSelect) => {
   for (const [key, value] of Object.entries(camSelect)) {
     selectTxt = selectTxt + `<option value="${key}">${key}(${value.length})</option>`
   }
-  document.getElementById('selectcampaging').innerHTML = selectTxt
+  document.getElementById('selectcamfilter').innerHTML = selectTxt
 }
 
-// iData is pic data from NASA API
-// index is first picture to render
-// iCamArray (optional) should be one array from the iCameras object,
-// i.e. send iCameras.FHAZ with just photo elements
-function buildPicGrid (iDataPP, index, iCamArray) {
-  if (!iCamArray) {
-    console.log('initializing for all cameras')
-    let gridText = ''
-    for (let i = index; i < Math.min(index + IMG_PER_PAGE, iDataPP.length); i++) {
-      gridText = gridText + '<div class="grid-item">' +
-        // `<a href="${iDataPP[i].img_src.replace('http://', 'https://')}">` +
-        `<a href="${iDataPP[i].img_src}">` +
-        `<img src="${iDataPP[i].img_src}" alt="${iDataPP[i].camera.full_name}"></a>` + 
-        `<p>${iDataPP[i].camera.full_name} (${iDataPP[i].camera.name})` +
-        '</div>'
-    }
-    return gridText
+function buildPicGrid () {
+  let picArray = {}
+  if (paging.filter !== 'ALL') {
+    picArray = imageFilt(paging.filter)
   } else {
-    console.log('iCamArray defined')
+    picArray = imageData
+  }
+
+  let gridText = ''
+  for (let i = paging.index; i < Math.min(paging.index + IMG_PER_PAGE, picArray.length); i++) {
+    gridText = gridText + '<div class="grid-item">' +
+      `<a href="${picArray[i].img_src}">` +
+      `<img src="${picArray[i].img_src}" alt="${picArray[i].camera.full_name}"></a>` + 
+      `<p>${picArray[i].camera.full_name} (${picArray[i].camera.name})` +
+      '</div>'
+  }
+  return gridText
+}
+
+function pageFwd () {
+  if (paging.index + IMG_PER_PAGE < paging.numToday - 1) {
+    paging.index += IMG_PER_PAGE
+    drawNextPage()
   }
 }
 
-function pageFwd (iDataPP) {
-  paging.index += IMG_PER_PAGE
-  drawNextPage(iDataPP, paging.index)
-}
-
-function updatePageSelect (index, length, iDataPP) {
-  if (index + IMG_PER_PAGE < length - 1) { // Enable the FORWARD button
-    document.getElementById("fwdone").className = 'pagebtnconton'
-    document.getElementById('fwdone')
-      .addEventListener('click', pageFwd(iDataPP))
-  } else { // DISABLE the FORWARD button
-    document.getElementById("fwdone").className = 'pagebtncontoff'
-    document.getElementById('fwdone')
-      .removeEventListener('click', pageFwd)
-  }
-  if (index > 0) {
-    document.getElementById("backone").className = 'pagebtnconton'
+function pageBack () {
+  if (paging.index > 0) {
+    paging.index -= IMG_PER_PAGE
+    if (paging.index < 0) { paging.index = 0 }
+    drawNextPage()
   }
 }
 
-function drawNextPage (iDataPP, index) {
-  const gridText = buildPicGrid(iDataPP, index)
+function updatePageSelect () {
+  if (paging.index + IMG_PER_PAGE < imageData.length - 1) { // Enable the FORWARD button
+    document.getElementById('fwdone').className = 'pagebtnconton'
+  } else { // unlight the FORWARD button
+    document.getElementById('fwdone').className = 'pagebtncontoff'
+  }
+  if (paging.index > 0) {
+    document.getElementById('backone').className = 'pagebtnconton'
+  } else { // unlight the BACK button
+    document.getElementById('backone').className = 'pagebtncontoff'
+  }
+  console.debug(`index: ${paging.index}, length: ${imageData.length}`)
+}
+
+function drawNextPage () {
+  const gridText = buildPicGrid()
   document.getElementById('griditems').innerHTML = gridText
-  updatePageSelect(index, iDataPP.length, iDataPP)
-  debugger
+  updatePageSelect()
 }
 
 //
@@ -257,48 +267,66 @@ async function initImageGrid (rover, date) {
   // second param for fetchQuery calls encodeURIComponent on it because ? no bueno
   const iData = await fetchQuery(`/mars-photos/api/v1/rovers/${rover}/photos`, `?earth_date=${date}`)
 
+  imageData = iData.photos.photos
+
   paging.rover = rover
   paging.index = 0
-  if (iData.photos.photos.length === 0) {
+  paging.numToday = imageData.length
+  paging.filter = 'ALL'
+
+  if (paging.numToday === 0) {
     // if there are no photos on this mission date, return
     alert(`Sorry, ${manifest[rover].name} did not send any photos back to Earth on ${date}.`)
     return
   }
 
   // Draw main grid
-  const gridText = buildPicGrid(iData.photos.photos, paging.index)
+  const gridText = buildPicGrid()
   document.getElementById('griditems').innerHTML = gridText
 
   // Photo page navigation buttons, fwd, back etc
-  setupPageNav(iData.photos.photos.length + 1)
+  setupPageNav()
 
-  // Dropdown for camera type
-  const iCameras = buildCamSelect(iData.photos.photos, rover)
-  drawCamSelect(iCameras)
+  // Build dropdown for camera type
+  imageFilt = buildCamSelect()
+  drawCamSelect(imageFilt)
 
-  // updatePageSelect(paging.index, iData.photos.photos.length, iData.photos.photos)
-  debugger
+  updatePageSelect()
+  document.getElementById('fwdone')
+    .addEventListener('click', function () { pageFwd() })
+  document.getElementById('backone')
+    .addEventListener('click', function () { pageBack() })
+  document.getElementById('selectcamfilter')
+    .addEventListener('change', function () { clickFilter() })
 }
 
-function setupPageNav (numPics) {
-  console.log('numPics is ' + numPics)
-  // document.getElementById('pictotpaging').innerHTML = `${numPics} Total Photos`
+function clickFilter() {
+  paging.filter = document.getElementById('selectcamfilter').value
+  console.debug(`select box says ${document.getElementById('selectcamfilter').value}`)
+  paging.index = 0
+  debugger
+  paging.numToday = imageFilt[paging.filter].length
+  buildPicGrid()
+}
+
+function setupPageNav () {
   const buttonTxt = '<button class="pagebtncontoff" id="backone"><<</button>' +
     '<button class="pagebtncontoff" id="fwdone">>></button>'
   document.getElementById('buttonpaging').innerHTML = buttonTxt
-  // selectTxt = '<select '
 }
 
 const setupRoverMain = (roverName) => {
+  paging.rover = 'roverName'
+  paging.index = 0
   console.debug('setupgrid running for ' + roverName)
   const grid = []
   grid[0] = makePrime(roverName)
-  grid[1] = makePrime(roverName)
-  grid[2] = makePrime(roverName)
   drawGrid(grid)
   drawPageControl(roverName)
   document.getElementById('clickdate')
-    .addEventListener('click', function () { initImageGrid(roverName, document.getElementById('dateSelected').value) })
+    .addEventListener('click', function () {
+      initImageGrid(roverName, document.getElementById('dateSelected').value)
+    })
 }
 
 window.addEventListener('load', () => {
