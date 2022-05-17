@@ -6,7 +6,7 @@ const path = require('path')
 
 const app = express()
 const port = 3000
-console.log(process.env)
+// console.log(process.env)
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
@@ -28,7 +28,6 @@ app.get('/apod', async (req, res) => {
 app.get('/mars-photos*', async (req, res) => {
   try {
     let query = ''
-    console.log(req.params[0])
     if (req.params[0].includes('?')) {
       query = `https://api.nasa.gov/mars-photos${req.params[0]}&api_key=${process.env.API_KEY}`
     } else {
@@ -37,7 +36,7 @@ app.get('/mars-photos*', async (req, res) => {
     const photos = await fetch(query)
       .then(res => res.json())
     res.send({ photos })
-    console.log(`fetched ${query}`)
+    // console.log(`fetched ${query}`)
   } catch (err) {
     console.error(`error: ${err}`)
   }
